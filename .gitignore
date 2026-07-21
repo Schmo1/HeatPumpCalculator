@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+*.user
+*.db
+*.db-shm
+*.db-wal
+
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# Env / Secrets
+.env
+
+# IDE
+.vs/
+.idea/

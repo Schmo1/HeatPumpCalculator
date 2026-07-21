@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/HeatPumpCalculator.Api/HeatPumpCalculator.Api.csproj" />
+  </Folder>
+</Solution>

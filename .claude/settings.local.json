@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(dotnet --version)",
+      "Bash(dotnet --list-sdks)",
+      "Bash(npm --version)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(dotnet build *)",
+      "Bash(rm -f heatpump.dev.db)",
+      "Bash(ASPNETCORE_ENVIRONMENT=Development ASPNETCORE_URLS=http://localhost:5099 nohup dotnet run --no-launch-profile -c Release)",
+      "Bash(echo \"started pid $!\")",
+      "Read(//tmp/**)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([b['month'] for p in d for b in p['monthlyBills'] if 'r' in b['month'].lower\\(\\) and 'z' in b['month'].lower\\(\\)]\\)\")",
+      "PowerShell(wsl --status 2>&1)",
+      "PowerShell(wsl --list --verbose 2>&1)",
+      "PowerShell(\"--- distros ---\")"
+    ]
+  }
+}
