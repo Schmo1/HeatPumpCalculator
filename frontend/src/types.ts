@@ -13,7 +13,7 @@ export interface BillingPeriod {
   sortOrder: number;
   totalConsumptionKwh: number;
   heatPumpMeterReading: number;
-  // berechnet:
+  // computed:
   heatPumpConsumption: number;
   davidTotalCost: number;
   heatingTotalCost: number;
@@ -49,7 +49,7 @@ export interface WaterPeriod {
   davidWarmReading: number | null;
   sarahColdReading: number | null;
   sarahWarmReading: number | null;
-  // berechnet:
+  // computed:
   totalConsumption: number | null;
   davidCold: number | null;
   davidWarm: number | null;

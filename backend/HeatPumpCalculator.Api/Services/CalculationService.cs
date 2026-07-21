@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore;
 namespace HeatPumpCalculator.Api.Services;
 
 /// <summary>
-/// Bildet die Rechenlogik der ursprünglichen Excel-Datei nach.
-/// Die Entitäten speichern nur Eingabewerte; sämtliche abgeleiteten Größen
-/// (Verbrauch Heizung, Kostenaufteilung, Wasserverbräuche, Verhältnisse)
-/// werden hier aus den gespeicherten Zählerständen berechnet.
+/// Reproduces the calculation logic of the original Excel file.
+/// The entities only store input values; all derived quantities
+/// (heating consumption, cost split, water consumption, ratios)
+/// are computed here from the stored meter readings.
 /// </summary>
 public class CalculationService
 {
@@ -17,7 +17,7 @@ public class CalculationService
 
     public CalculationService(AppDbContext db) => _db = db;
 
-    // ---------- Abrechnung (Strom / Heizung) ----------
+    // ---------- Billing (electricity / heating) ----------
 
     public async Task<List<BillingPeriodDto>> GetBillingPeriodsAsync()
     {
@@ -27,7 +27,7 @@ public class CalculationService
             .ToListAsync();
 
         var result = new List<BillingPeriodDto>();
-        double previousReading = 0; // erster Zeitraum rechnet gegen 0
+        double previousReading = 0; // first period is calculated against 0
 
         foreach (var p in periods)
         {
@@ -40,25 +40,25 @@ public class CalculationService
 
     public async Task<BillingPeriodDto?> GetBillingPeriodAsync(int id)
     {
-        // Für korrekte Differenz-Berechnung wird der Vorzeitraum benötigt.
+        // The previous period is required for the correct difference calculation.
         var all = await GetBillingPeriodsAsync();
         return all.FirstOrDefault(p => p.Id == id);
     }
 
     private static BillingPeriodDto Compute(BillingPeriod p, double previousReading)
     {
-        // Verbrauch Heizung = Zählerstand - Vorzählerstand (Subzähler Wärmepumpe)
+        // Heating consumption = meter reading - previous reading (heat pump sub-meter)
         double heatPumpConsumption = p.HeatPumpMeterReading - previousReading;
 
-        // Kosten David Gesamt = Summe der Monatsrechnungen
+        // David total cost = sum of the monthly bills
         double davidTotalCost = p.MonthlyBills.Sum(b => b.Cost);
 
-        // Kosten gesamt Heizung = DavidGesamt / VerbrauchGesamt * VerbrauchHeizung
+        // Heating total cost = DavidTotal / TotalConsumption * HeatingConsumption
         double heatingTotalCost = p.TotalConsumptionKwh != 0
             ? davidTotalCost / p.TotalConsumptionKwh * heatPumpConsumption
             : 0;
 
-        // Aufteilung: David zahlt (100 - Anteil Sarah)%, Sarah zahlt Anteil Sarah%
+        // Split: David pays (100 - Sarah's share)%, Sarah pays Sarah's share%
         double davidHeatingCost = heatingTotalCost * (100 - p.SarahSharePercent) / 100;
         double sarahHeatingCost = heatingTotalCost * p.SarahSharePercent / 100;
 
@@ -79,7 +79,7 @@ public class CalculationService
             bills);
     }
 
-    // ---------- Wasser ----------
+    // ---------- Water ----------
 
     public async Task<List<WaterPeriodDto>> GetWaterPeriodsAsync()
     {
@@ -107,7 +107,7 @@ public class CalculationService
 
     private static WaterPeriodDto ComputeWater(WaterPeriod p, WaterPeriod? prev)
     {
-        // Basiszeile oder fehlender Vorzeitraum -> keine Verbräuche
+        // Baseline row or missing previous period -> no consumption
         if (p.IsBaseline || prev is null)
         {
             return new WaterPeriodDto(
@@ -117,12 +117,12 @@ public class CalculationService
                 null, null, null, null, null, null, null, null, null);
         }
 
-        // David: steigende Zähler -> aktuell - vorher
+        // David: rising meters -> current - previous
         double? davidCold = Diff(p.DavidColdReading, prev.DavidColdReading);
         double? davidWarm = Diff(p.DavidWarmReading, prev.DavidWarmReading);
         double? davidTotal = Add(davidCold, davidWarm);
 
-        // Sarah: fallende Zähler ab 100000 -> vorher - aktuell
+        // Sarah: meters counting down from 100000 -> previous - current
         double? sarahCold = Diff(prev.SarahColdReading, p.SarahColdReading);
         double? sarahWarm = Diff(prev.SarahWarmReading, p.SarahWarmReading);
         double? sarahTotal = Add(sarahCold, sarahWarm);
@@ -146,7 +146,7 @@ public class CalculationService
             Round(sarahWarmRatio), Round(sarahTotalRatio));
     }
 
-    // ---------- Hilfsfunktionen ----------
+    // ---------- Helper functions ----------
 
     private static double? Diff(double? a, double? b)
         => (a.HasValue && b.HasValue) ? a.Value - b.Value : null;

@@ -48,7 +48,10 @@ public class WaterPeriodsController : ControllerBase
     public async Task<ActionResult<WaterPeriodDto>> Update(int id, WaterPeriodInputDto input)
     {
         var entity = await _db.WaterPeriods.FindAsync(id);
-        if (entity is null) return NotFound();
+        if (entity is null)
+        {
+            return NotFound();
+        }
         Map(entity, input);
         await _db.SaveChangesAsync();
         return await _calc.GetWaterPeriodAsync(id) is { } dto ? dto : NotFound();
@@ -59,7 +62,10 @@ public class WaterPeriodsController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var entity = await _db.WaterPeriods.FindAsync(id);
-        if (entity is null) return NotFound();
+        if (entity is null)
+        {
+            return NotFound();
+        }
         _db.WaterPeriods.Remove(entity);
         await _db.SaveChangesAsync();
         return NoContent();

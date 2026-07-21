@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 namespace HeatPumpCalculator.Api.Auth;
 
 /// <summary>
-/// Passwort-Hashing mit PBKDF2 (SHA-256). Format: {iterations}.{saltBase64}.{hashBase64}
+/// Password hashing with PBKDF2 (SHA-256). Format: {iterations}.{saltBase64}.{hashBase64}
 /// </summary>
 public static class PasswordHasher
 {
@@ -22,8 +22,14 @@ public static class PasswordHasher
     public static bool Verify(string password, string stored)
     {
         var parts = stored.Split('.', 3);
-        if (parts.Length != 3) return false;
-        if (!int.TryParse(parts[0], out int iterations)) return false;
+        if (parts.Length != 3)
+        {
+            return false;
+        }
+        if (!int.TryParse(parts[0], out int iterations))
+        {
+            return false;
+        }
 
         byte[] salt = Convert.FromBase64String(parts[1]);
         byte[] expected = Convert.FromBase64String(parts[2]);

@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 namespace HeatPumpCalculator.Api.Data;
 
 /// <summary>
-/// Legt die DB an, sät die Benutzer (Admin/Reader aus der Konfiguration)
-/// und – falls noch leer – die Ausgangsdaten aus der ursprünglichen Excel.
+/// Creates the DB, seeds the users (Admin/Reader from the configuration)
+/// and – if still empty – the initial data from the original Excel file.
 /// </summary>
 public static class DbSeeder
 {
@@ -19,13 +19,13 @@ public static class DbSeeder
         if (!await db.BillingPeriods.AnyAsync())
         {
             SeedBillingData(db);
-            logger.LogInformation("Abrechnungs-Startdaten aus Excel gesät.");
+            logger.LogInformation("Seeded initial billing data from Excel.");
         }
 
         if (!await db.WaterPeriods.AnyAsync())
         {
             SeedWaterData(db);
-            logger.LogInformation("Wasser-Startdaten aus Excel gesät.");
+            logger.LogInformation("Seeded initial water data from Excel.");
         }
 
         await db.SaveChangesAsync();
@@ -44,7 +44,7 @@ public static class DbSeeder
         {
             if (string.IsNullOrWhiteSpace(acc.Pass))
             {
-                logger.LogWarning("Kein Passwort für Benutzer '{User}' konfiguriert – wird übersprungen.", acc.User);
+                logger.LogWarning("No password configured for user '{User}' – skipping.", acc.User);
                 continue;
             }
 
@@ -57,11 +57,11 @@ public static class DbSeeder
                     Role = acc.Role,
                     PasswordHash = PasswordHasher.Hash(acc.Pass),
                 });
-                logger.LogInformation("Benutzer '{User}' ({Role}) angelegt.", acc.User, acc.Role);
+                logger.LogInformation("Created user '{User}' ({Role}).", acc.User, acc.Role);
             }
             else
             {
-                // Rolle/Passwort an aktuelle Konfiguration angleichen.
+                // Align role/password with the current configuration.
                 existing.Role = acc.Role;
                 existing.PasswordHash = PasswordHasher.Hash(acc.Pass);
             }
@@ -77,10 +77,10 @@ public static class DbSeeder
                 TotalConsumptionKwh = 3028.92, HeatPumpMeterReading = 1484, SarahSharePercent = 50,
                 MonthlyBills =
                 {
-                    new() { SortOrder = 1, Month = "Juli-September", Cost = 208 },
-                    new() { SortOrder = 2, Month = "Oktober", Cost = 74.69 },
+                    new() { SortOrder = 1, Month = "July-September", Cost = 208 },
+                    new() { SortOrder = 2, Month = "October", Cost = 74.69 },
                     new() { SortOrder = 3, Month = "November", Cost = 100.83 },
-                    new() { SortOrder = 4, Month = "Dezember", Cost = 135.87 },
+                    new() { SortOrder = 4, Month = "December", Cost = 135.87 },
                 }
             },
             new BillingPeriod
@@ -89,13 +89,13 @@ public static class DbSeeder
                 TotalConsumptionKwh = 3076, HeatPumpMeterReading = 3189.01, SarahSharePercent = 55,
                 MonthlyBills =
                 {
-                    new() { SortOrder = 1, Month = "Januar", Cost = 160.93 },
-                    new() { SortOrder = 2, Month = "Februar", Cost = 125.18 },
-                    new() { SortOrder = 3, Month = "März", Cost = 104.86 },
+                    new() { SortOrder = 1, Month = "January", Cost = 160.93 },
+                    new() { SortOrder = 2, Month = "February", Cost = 125.18 },
+                    new() { SortOrder = 3, Month = "March", Cost = 104.86 },
                     new() { SortOrder = 4, Month = "April", Cost = 84.25 },
-                    new() { SortOrder = 5, Month = "Mai", Cost = 83.84 },
-                    new() { SortOrder = 6, Month = "Juni", Cost = 69.94 },
-                    new() { SortOrder = 7, Month = "Juli", Cost = 70.56 },
+                    new() { SortOrder = 5, Month = "May", Cost = 83.84 },
+                    new() { SortOrder = 6, Month = "June", Cost = 69.94 },
+                    new() { SortOrder = 7, Month = "July", Cost = 70.56 },
                 }
             },
             new BillingPeriod
@@ -106,9 +106,9 @@ public static class DbSeeder
                 {
                     new() { SortOrder = 1, Month = "August", Cost = 75.15, Consumption = 294.47 },
                     new() { SortOrder = 2, Month = "September", Cost = 66.94, Consumption = 252.22 },
-                    new() { SortOrder = 3, Month = "Oktober", Cost = 107.01, Consumption = 445.09 },
+                    new() { SortOrder = 3, Month = "October", Cost = 107.01, Consumption = 445.09 },
                     new() { SortOrder = 4, Month = "November", Cost = 130.77, Consumption = 556.6 },
-                    new() { SortOrder = 5, Month = "Dezember", Cost = 174.8, Consumption = 760.39 },
+                    new() { SortOrder = 5, Month = "December", Cost = 174.8, Consumption = 760.39 },
                 }
             },
             new BillingPeriod
@@ -117,12 +117,12 @@ public static class DbSeeder
                 TotalConsumptionKwh = 2843, HeatPumpMeterReading = 6140, SarahSharePercent = 58.71,
                 MonthlyBills =
                 {
-                    new() { SortOrder = 1, Month = "Januar", Cost = 156.8, Consumption = 756 },
-                    new() { SortOrder = 2, Month = "Februar", Cost = 122, Consumption = 585 },
-                    new() { SortOrder = 3, Month = "März", Cost = 116.19, Consumption = 450 },
+                    new() { SortOrder = 1, Month = "January", Cost = 156.8, Consumption = 756 },
+                    new() { SortOrder = 2, Month = "February", Cost = 122, Consumption = 585 },
+                    new() { SortOrder = 3, Month = "March", Cost = 116.19, Consumption = 450 },
                     new() { SortOrder = 4, Month = "April", Cost = 85.3, Consumption = 389 },
-                    new() { SortOrder = 5, Month = "Mai", Cost = 74.36, Consumption = 330 },
-                    new() { SortOrder = 6, Month = "Juni", Cost = 74.46, Consumption = 333 },
+                    new() { SortOrder = 5, Month = "May", Cost = 74.36, Consumption = 330 },
+                    new() { SortOrder = 6, Month = "June", Cost = 74.46, Consumption = 333 },
                 }
             });
     }

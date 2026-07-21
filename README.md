@@ -1,142 +1,142 @@
-# Wärmepumpen-Abrechnung
+# Heat Pump Billing
 
-Webanwendung als Ersatz für die Excel-Datei `Strom Heizung Rechner_new.xlsx`.
-Sie verwaltet die Strom- und Wasserabrechnung zweier Wohnungen und stellt Energie-
-und Wasserverbräuche in Diagrammen dar.
+Web application replacing the Excel file `Strom Heizung Rechner_new.xlsx`.
+It manages the electricity and water billing for two apartments and displays energy
+and water consumption in charts.
 
-- **Frontend:** React + TypeScript + Vite, Diagramme mit Recharts, ausgeliefert über nginx
-- **Backend:** ASP.NET Core 10 Web-API, EF Core mit **SQLite**
-- **Auth:** JWT – ein **Admin** (darf Werte eintragen/ändern) und beliebige **Leser** (nur Ansicht)
-- **Betrieb:** komplett in Docker (`docker compose`)
+- **Frontend:** React + TypeScript + Vite, charts with Recharts, served via nginx
+- **Backend:** ASP.NET Core 10 Web API, EF Core with **SQLite**
+- **Auth:** JWT – one **Admin** (may enter/edit values) and any number of **readers** (view only)
+- **Deployment:** fully in Docker (`docker compose`)
 
-## Zähler-Aufbau
+## Meter setup
 
-- Ein **Haupt-Stromzähler** (VKW) misst **Wärmepumpe + Wohnung 1 (David)**.
-- Die **Wärmepumpe** hat einen eigenen **Subzähler**.
-- **Wohnung 2 (Sarah)** wird an den Heizkosten beteiligt; ihr Anteil folgt dem
-  **Warmwasser-Verhältnis** aus der Wasserauswertung.
+- A **main electricity meter** (VKW) measures **heat pump + apartment 1 (David)**.
+- The **heat pump** has its own **sub-meter**.
+- **Apartment 2 (Sarah)** shares the heating costs; her share follows the
+  **hot water ratio** from the water evaluation.
 
-## Rechenlogik (aus der Excel übernommen und verifiziert)
+## Calculation logic (taken from the Excel file and verified)
 
-**Abrechnung (Strom/Heizung), je Zeitraum:**
+**Billing (electricity/heating), per period:**
 
-| Größe | Formel |
+| Quantity | Formula |
 |---|---|
-| Verbrauch Heizung | `Zählerstand Heizung − vorheriger Zählerstand` |
-| Kosten David Gesamt | Summe der Monatsrechnungen |
-| Kosten Heizung gesamt | `KostenDavidGesamt ÷ VerbrauchGesamt × VerbrauchHeizung` |
-| Kosten David | `KostenHeizung × (100 − AnteilSarah) / 100` |
-| Kosten Sarah | `KostenHeizung × AnteilSarah / 100` |
+| Heating consumption | `heating meter reading − previous meter reading` |
+| David total cost | Sum of the monthly bills |
+| Heating total cost | `DavidTotalCost ÷ TotalConsumption × HeatingConsumption` |
+| David cost | `HeatingCost × (100 − SarahShare) / 100` |
+| Sarah cost | `HeatingCost × SarahShare / 100` |
 
-**Wasser, je Zeitraum (Differenz zum Vorzeitraum):** David-Zähler steigen, Sarahs Zähler
-fallen ab 100000. Daraus werden Verbräuche sowie `Warmwasser-Anteil Sarah` und
-`Gesamt-Anteil Sarah` berechnet. Die Zeile **„Init"** dient nur als Ausgangs-Zählerstand.
+**Water, per period (difference to the previous period):** David's meters rise, Sarah's meters
+count down from 100000. From this, consumption as well as `Sarah's hot water share` and
+`Sarah's total share` are computed. The **"Init"** row serves only as a starting meter reading.
 
-## Schnellstart (Docker)
+## Quick start (Docker)
 
-Voraussetzung: Docker Desktop läuft.
+Prerequisite: Docker Desktop is running.
 
 ```bash
-# 1. Umgebungsvariablen setzen
+# 1. Set environment variables
 cp .env.example .env
-#    In .env mindestens setzen: JWT_KEY (>= 32 Zeichen), ADMIN_PASSWORD, READER_PASSWORD
+#    In .env set at least: JWT_KEY (>= 32 characters), ADMIN_PASSWORD, READER_PASSWORD
 
-# 2. Starten
+# 2. Start
 docker compose up -d --build
 
-# 3. Öffnen
-#    http://localhost:8080   (bzw. WEB_PORT aus .env)
+# 3. Open
+#    http://localhost:8080   (or WEB_PORT from .env)
 ```
 
-Anmeldung mit den in `.env` gesetzten Konten (Standard-Benutzernamen `admin` / `viewer`).
+Sign in with the accounts configured in `.env` (default usernames `admin` / `viewer`).
 
-Stoppen: `docker compose down` — die Daten bleiben im Volume `heatpump-data` erhalten.
-Komplett zurücksetzen (Daten löschen): `docker compose down -v`.
+Stop: `docker compose down` — the data is preserved in the volume `heatpump-data`.
+Full reset (delete data): `docker compose down -v`.
 
-### `.env`-Variablen
+### `.env` variables
 
-| Variable | Bedeutung |
+| Variable | Meaning |
 |---|---|
-| `JWT_KEY` | Signaturschlüssel der Tokens, **mindestens 32 Zeichen**, geheim halten |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin-Konto (Schreibrechte) |
-| `READER_USERNAME` / `READER_PASSWORD` | Leser-Konto (nur Ansicht) |
-| `WEB_PORT` | Host-Port der Web-App (Standard 8080) |
+| `JWT_KEY` | Signing key for the tokens, **at least 32 characters**, keep secret |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Admin account (write access) |
+| `READER_USERNAME` / `READER_PASSWORD` | Reader account (view only) |
+| `WEB_PORT` | Host port of the web app (default 8080) |
 
-> Die Konten werden bei jedem Start aus der Konfiguration angeglichen (Rolle + Passwort).
-> Ein neues Passwort in `.env` wird beim nächsten `up` übernommen. Weitere Leser lassen sich
-> ergänzen, indem man die Seed-Logik in `backend/.../Data/DbSeeder.cs` erweitert.
+> The accounts are aligned with the configuration on every start (role + password).
+> A new password in `.env` is applied on the next `up`. Additional readers can be
+> added by extending the seed logic in `backend/.../Data/DbSeeder.cs`.
 
-## Architektur
+## Architecture
 
 ```
 Browser ──▶ web (nginx)
-             ├─ liefert die React-SPA (statisch)
-             └─ /api/*  ──▶ api (ASP.NET Core, Port 8080)
-                              └─ SQLite  (Volume: /data/heatpump.db)
+             ├─ serves the React SPA (static)
+             └─ /api/*  ──▶ api (ASP.NET Core, port 8080)
+                              └─ SQLite  (volume: /data/heatpump.db)
 ```
 
-Beim ersten Start legt das Backend die Datenbank an, migriert das Schema und sät die
-Ausgangsdaten aus der Excel (Blätter „Abrechnung", „Wasser Verbrauch", „Kosten …").
+On first start the backend creates the database, migrates the schema and seeds the
+initial data from the Excel file (sheets "Abrechnung", "Wasser Verbrauch", "Kosten …").
 
-## Lokale Entwicklung (ohne Docker)
+## Local development (without Docker)
 
-**Backend** (benötigt .NET 10 SDK):
+**Backend** (requires .NET 10 SDK):
 
 ```bash
 cd backend/HeatPumpCalculator.Api
 dotnet run
-# nutzt appsettings.Development.json: SQLite-Datei lokal,
-# Konten admin/admin123 und viewer/viewer123, CORS für http://localhost:5173
-# API unter http://localhost:5099 (Swagger/OpenAPI ist bewusst nicht aktiv)
+# uses appsettings.Development.json: SQLite file locally,
+# accounts admin/admin123 and viewer/viewer123, CORS for http://localhost:5173
+# API at http://localhost:5099 (Swagger/OpenAPI is intentionally disabled)
 ```
 
-**Frontend** (benötigt Node 20+):
+**Frontend** (requires Node 20+):
 
 ```bash
 cd frontend
 npm install
-npm run dev      # http://localhost:5173, /api wird an :5099 weitergeleitet
+npm run dev      # http://localhost:5173, /api is proxied to :5099
 ```
 
-## REST-API (Auszug)
+## REST API (excerpt)
 
-| Methode | Pfad | Rolle |
+| Method | Path | Role |
 |---|---|---|
 | `POST` | `/api/auth/login` | – |
-| `GET` | `/api/auth/me` | angemeldet |
-| `GET` | `/api/billing-periods` | angemeldet |
+| `GET` | `/api/auth/me` | authenticated |
+| `GET` | `/api/billing-periods` | authenticated |
 | `POST/PUT/DELETE` | `/api/billing-periods[/{id}]` | Admin |
 | `POST/PUT/DELETE` | `/api/billing-periods/{id}/bills[/{billId}]` | Admin |
-| `GET` | `/api/water-periods` | angemeldet |
+| `GET` | `/api/water-periods` | authenticated |
 | `POST/PUT/DELETE` | `/api/water-periods[/{id}]` | Admin |
 | `GET` | `/health` | – |
 
-Lesen erfordert Anmeldung; schreibende Zugriffe sind der Admin-Rolle vorbehalten
-(Server-seitig erzwungen, Leser erhalten `403`).
+Reading requires authentication; write access is reserved for the Admin role
+(enforced server-side, readers receive `403`).
 
 ## Troubleshooting
 
-**Docker Desktop startet nicht** mit einer Meldung wie
+**Docker Desktop does not start** with a message like
 `initializing Inference manager … remove …\dockerInference: The file cannot be accessed by
-the system` (oder analog `…\docker-secrets-engine\engine.sock`): verwaiste Socket-Dateien nach
-unsauberem Beenden. Reparatur:
+the system` (or similarly `…\docker-secrets-engine\engine.sock`): orphaned socket files after
+an unclean shutdown. Repair:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/fix-docker-start.ps1
 ```
 
-Das Skript beendet Docker + WSL, benennt die betroffenen Verzeichnisse um (Docker legt sie neu
-an) und startet Docker Desktop wieder. Zur Vorbeugung Docker Desktop über das Tray-Icon
-„Quit Docker Desktop" sauber beenden statt hart zu killen.
+The script stops Docker + WSL, renames the affected directories (Docker recreates them)
+and restarts Docker Desktop. To prevent this, quit Docker Desktop cleanly via the tray icon
+"Quit Docker Desktop" instead of hard-killing it.
 
-## Projektstruktur
+## Project structure
 
 ```
 HeatPumpCalculator/
 ├─ docker-compose.yml
 ├─ .env.example
-├─ Strom Heizung Rechner_new.xlsx      # Original-Excel (Referenz)
-├─ backend/HeatPumpCalculator.Api/     # ASP.NET Core 10 Web-API
+├─ Strom Heizung Rechner_new.xlsx      # original Excel file (reference)
+├─ backend/HeatPumpCalculator.Api/     # ASP.NET Core 10 Web API
 │  ├─ Models/  Data/  Dtos/  Services/  Auth/  Controllers/
 │  └─ Dockerfile
 └─ frontend/                           # React + Vite + TypeScript

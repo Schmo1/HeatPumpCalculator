@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { useI18n } from "../i18n/LanguageContext";
 import { ApiError } from "../api/client";
 
 export default function Login() {
   const { login, isAuthenticated } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +25,11 @@ export default function Login() {
       await login(username, password);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Anmeldung fehlgeschlagen.");
+      if (err instanceof ApiError && err.status === 401) {
+        setError(t("login.invalidCredentials"));
+      } else {
+        setError(err instanceof ApiError ? err.message : t("login.failed"));
+      }
     } finally {
       setBusy(false);
     }
@@ -32,19 +38,19 @@ export default function Login() {
   return (
     <div className="login-wrap">
       <form className="card login-card" onSubmit={handleSubmit}>
-        <h1>🔥 Wärmepumpen-Abrechnung</h1>
-        <p className="subtitle" style={{ textAlign: "center" }}>Bitte anmelden</p>
+        <h1>{t("login.title")}</h1>
+        <p className="subtitle" style={{ textAlign: "center" }}>{t("login.subtitle")}</p>
         <div className="field">
-          <label htmlFor="u">Benutzername</label>
+          <label htmlFor="u">{t("login.username")}</label>
           <input id="u" value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
         </div>
         <div className="field">
-          <label htmlFor="p">Passwort</label>
+          <label htmlFor="p">{t("login.password")}</label>
           <input id="p" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {error && <div className="error">{error}</div>}
-        <button type="submit" disabled={busy}>{busy ? "Anmelden…" : "Anmelden"}</button>
-        <p className="hint">Admin darf bearbeiten, Leser nur ansehen.</p>
+        <button type="submit" disabled={busy}>{busy ? t("login.signingIn") : t("login.signIn")}</button>
+        <p className="hint">{t("login.hint")}</p>
       </form>
     </div>
   );

@@ -1,6 +1,6 @@
 namespace HeatPumpCalculator.Api.Dtos;
 
-/// <summary>Monatsrechnung – Ausgabe.</summary>
+/// <summary>Monthly bill – output.</summary>
 public record MonthlyBillDto(
     int Id,
     int SortOrder,
@@ -9,7 +9,7 @@ public record MonthlyBillDto(
     double? Consumption,
     string? Comment);
 
-/// <summary>Monatsrechnung – Eingabe (Anlegen/Ändern).</summary>
+/// <summary>Monthly bill – input (create/update).</summary>
 public record MonthlyBillInputDto(
     int SortOrder,
     string Month,
@@ -17,14 +17,14 @@ public record MonthlyBillInputDto(
     double? Consumption,
     string? Comment);
 
-/// <summary>Abrechnungszeitraum inkl. aller berechneten Werte – Ausgabe.</summary>
+/// <summary>Billing period including all computed values – output.</summary>
 public record BillingPeriodDto(
     int Id,
     string Label,
     int SortOrder,
     double TotalConsumptionKwh,
     double HeatPumpMeterReading,
-    // berechnet:
+    // computed:
     double HeatPumpConsumption,
     double DavidTotalCost,
     double HeatingTotalCost,
@@ -33,7 +33,7 @@ public record BillingPeriodDto(
     double SarahHeatingCost,
     List<MonthlyBillDto> MonthlyBills);
 
-/// <summary>Abrechnungszeitraum – Eingabe (nur die eingegebenen Felder).</summary>
+/// <summary>Billing period – input (only the entered fields).</summary>
 public record BillingPeriodInputDto(
     string Label,
     int SortOrder,

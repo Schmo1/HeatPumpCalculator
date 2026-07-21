@@ -61,6 +61,20 @@ a { color: var(--primary-dark); }
 }
 .badge.reader { background: #64748b; }
 
+.lang-switch { display: flex; gap: 0.15rem; }
+.lang-btn {
+  background: transparent;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.lang-btn:hover { background: var(--bg-soft); color: #fff; }
+.lang-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
 .container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
 h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
 h2 { font-size: 1.1rem; margin: 1.75rem 0 0.75rem; }

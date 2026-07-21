@@ -5,14 +5,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Default: "Data Source=/data/heatpump.db"
-      Jwt__Key: "${JWT_KEY:?JWT_KEY muss in .env gesetzt sein (>= 32 Zeichen)}"
+      Jwt__Key: "${JWT_KEY:?JWT_KEY must be set in .env (>= 32 characters)}"
       Jwt__Issuer: "HeatPumpCalculator"
       Jwt__Audience: "HeatPumpCalculator"
       Jwt__ExpiryHours: "12"
       Seed__AdminUsername: "${ADMIN_USERNAME:-admin}"
-      Seed__AdminPassword: "${ADMIN_PASSWORD:?ADMIN_PASSWORD muss in .env gesetzt sein}"
+      Seed__AdminPassword: "${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}"
       Seed__ReaderUsername: "${READER_USERNAME:-viewer}"
-      Seed__ReaderPassword: "${READER_PASSWORD:?READER_PASSWORD muss in .env gesetzt sein}"
+      Seed__ReaderPassword: "${READER_PASSWORD:?READER_PASSWORD must be set in .env}"
     volumes:
       - heatpump-data:/data
     restart: unless-stopped

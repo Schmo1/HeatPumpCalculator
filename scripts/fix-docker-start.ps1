@@ -1,26 +1,26 @@
 <#
 .SYNOPSIS
-  Behebt den Docker-Desktop-Startfehler "initializing Inference manager / secrets-engine:
+  Fixes the Docker Desktop startup error "initializing Inference manager / secrets-engine:
   remove ...\engine.sock: The file cannot be accessed by the system".
 
 .DESCRIPTION
-  Ursache sind verwaiste AF_UNIX-Socket-Dateien, die Windows nach einem unsauberen
-  Docker-Beenden nicht mehr löschen kann. Sie liegen in
+  The cause is orphaned AF_UNIX socket files that Windows can no longer delete after an
+  unclean Docker shutdown. They are located in
     %LOCALAPPDATA%\Docker\run
     %LOCALAPPDATA%\docker-secrets-engine
-  Die Dateien selbst lassen sich nicht löschen – wohl aber die enthaltenden Verzeichnisse
-  umbenennen. Docker legt sie beim nächsten Start neu an.
+  The files themselves cannot be deleted – but the containing directories can be
+  renamed. Docker recreates them on the next start.
 
-  Das Skript: beendet Docker + WSL, benennt die betroffenen Verzeichnisse in *.brokenN um
-  und startet Docker Desktop neu.
+  The script: stops Docker + WSL, renames the affected directories to *.brokenN
+  and restarts Docker Desktop.
 
 .NOTES
-  Tipp gegen Wiederkehr: Docker Desktop möglichst über das Tray-Icon -> "Quit Docker Desktop"
-  sauber beenden, statt den Prozess hart zu killen oder den Rechner im laufenden Zustand
-  abzuschalten.
+  Tip to avoid recurrence: shut down Docker Desktop cleanly via the tray icon ->
+  "Quit Docker Desktop" instead of hard-killing the process or shutting down the
+  machine while it is running.
 #>
 
-Write-Host "Beende Docker-Prozesse und WSL..." -ForegroundColor Cyan
+Write-Host "Stopping Docker processes and WSL..." -ForegroundColor Cyan
 Get-Process "*docker*" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 wsl --shutdown 2>&1 | Out-Null
 Start-Sleep -Seconds 5
@@ -40,15 +40,15 @@ foreach ($base in $targets) {
       Rename-Item -LiteralPath $base -NewName "$leaf.broken$i" -ErrorAction Stop
       Write-Host "  $leaf -> $leaf.broken$i" -ForegroundColor Green
     } catch {
-      Write-Host "  $leaf konnte nicht umbenannt werden: $($_.Exception.Message)" -ForegroundColor Yellow
+      Write-Host "  $leaf could not be renamed: $($_.Exception.Message)" -ForegroundColor Yellow
     }
   }
 }
 
-Write-Host "Starte Docker Desktop neu..." -ForegroundColor Cyan
+Write-Host "Restarting Docker Desktop..." -ForegroundColor Cyan
 Start-Process "$env:ProgramFiles\Docker\Docker\Docker Desktop.exe"
 
-Write-Host "Warte auf den Docker-Daemon..." -ForegroundColor Cyan
+Write-Host "Waiting for the Docker daemon..." -ForegroundColor Cyan
 $ready = $false
 for ($i = 0; $i -lt 30; $i++) {
   Start-Sleep -Seconds 6
@@ -57,10 +57,10 @@ for ($i = 0; $i -lt 30; $i++) {
 }
 
 if ($ready) {
-  Write-Host "Docker ist bereit. Du kannst jetzt 'docker compose up -d' ausfuehren." -ForegroundColor Green
+  Write-Host "Docker is ready. You can now run 'docker compose up -d'." -ForegroundColor Green
 } else {
-  Write-Host "Docker ist noch nicht bereit - bitte kurz warten und 'docker info' erneut pruefen." -ForegroundColor Yellow
+  Write-Host "Docker is not ready yet - please wait a moment and check 'docker info' again." -ForegroundColor Yellow
 }
 
-# Aufraeumen der harmlosen *.broken-Ordner (enthalten die nicht loeschbaren Sockets) ist
-# optional; sie stoeren nicht und koennen manuell entfernt werden, sobald Windows das zulaesst.
+# Cleaning up the harmless *.broken folders (which contain the undeletable sockets) is
+# optional; they do no harm and can be removed manually once Windows allows it.

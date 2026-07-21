@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { useI18n } from "../i18n/LanguageContext";
 import type { BillingPeriod, BillingPeriodInput, MonthlyBillInput } from "../types";
 import { eur, num } from "../utils/format";
 
@@ -13,6 +14,7 @@ const emptyBill: MonthlyBillInput = {
 
 export default function Billing() {
   const { isAdmin } = useAuth();
+  const { t } = useI18n();
   const [periods, setPeriods] = useState<BillingPeriod[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,21 +58,21 @@ export default function Billing() {
     } catch (e) { setError((e as Error).message); }
   }
   async function deletePeriod(id: number) {
-    if (!confirm("Diesen Zeitraum inkl. Monatsrechnungen löschen?")) return;
+    if (!confirm(t("billing.confirmDeletePeriod"))) return;
     try { await api.del(`/api/billing-periods/${id}`); await load(); }
     catch (e) { setError((e as Error).message); }
   }
 
-  if (loading) return <p className="muted">Lädt…</p>;
+  if (loading) return <p className="muted">{t("common.loading")}</p>;
 
   return (
     <>
       <div className="toolbar">
         <div>
-          <h1>Strom / Heizung</h1>
-          <p className="subtitle">Abrechnungszeiträume. Berechnete Spalten sind blau hervorgehoben.</p>
+          <h1>{t("billing.title")}</h1>
+          <p className="subtitle">{t("billing.subtitle")}</p>
         </div>
-        {isAdmin && !adding && editId === null && <button onClick={startAdd}>+ Zeitraum</button>}
+        {isAdmin && !adding && editId === null && <button onClick={startAdd}>{t("period.add")}</button>}
       </div>
       {error && <div className="error">{error}</div>}
 
@@ -80,7 +82,7 @@ export default function Billing() {
           onChange={setForm}
           onSave={savePeriod}
           onCancel={() => { setAdding(false); setEditId(null); }}
-          title={editId ? "Zeitraum bearbeiten" : "Neuer Zeitraum"}
+          title={editId ? t("period.edit") : t("period.new")}
         />
       )}
 
@@ -88,15 +90,15 @@ export default function Billing() {
         <table>
           <thead>
             <tr>
-              <th>Zeitraum</th>
-              <th>Verbrauch Gesamt (kWh)</th>
-              <th>Zählerstand Heizung</th>
-              <th>Verbrauch Heizung</th>
-              <th>Kosten David Gesamt</th>
-              <th>Kosten Heizung gesamt</th>
-              <th>Anteil Sarah</th>
-              <th>Kosten David</th>
-              <th>Kosten Sarah</th>
+              <th>{t("billing.col.period")}</th>
+              <th>{t("billing.col.totalConsumption")}</th>
+              <th>{t("billing.col.heatingMeter")}</th>
+              <th>{t("billing.col.heatingConsumption")}</th>
+              <th>{t("billing.col.davidTotalCost")}</th>
+              <th>{t("billing.col.heatingTotalCost")}</th>
+              <th>{t("billing.col.sarahShare")}</th>
+              <th>{t("billing.col.davidCost")}</th>
+              <th>{t("billing.col.sarahCost")}</th>
               {isAdmin && <th></th>}
             </tr>
           </thead>
@@ -156,19 +158,20 @@ function PeriodForm({
   onCancel: () => void;
   title: string;
 }) {
+  const { t } = useI18n();
   return (
     <div className="card">
       <h3 style={{ marginTop: 0 }}>{title}</h3>
       <div className="form-grid">
-        <div><label>Bezeichnung</label><input value={value.label} onChange={(e) => onChange({ ...value, label: e.target.value })} /></div>
-        <div><label>Reihenfolge</label>{numInput(value.sortOrder, (n) => onChange({ ...value, sortOrder: n }))}</div>
-        <div><label>Verbrauch Gesamt (kWh)</label>{numInput(value.totalConsumptionKwh, (n) => onChange({ ...value, totalConsumptionKwh: n }))}</div>
-        <div><label>Zählerstand Heizung</label>{numInput(value.heatPumpMeterReading, (n) => onChange({ ...value, heatPumpMeterReading: n }))}</div>
-        <div><label>Anteil Sarah (%)</label>{numInput(value.sarahSharePercent, (n) => onChange({ ...value, sarahSharePercent: n }))}</div>
+        <div><label>{t("field.label")}</label><input value={value.label} onChange={(e) => onChange({ ...value, label: e.target.value })} /></div>
+        <div><label>{t("field.order")}</label>{numInput(value.sortOrder, (n) => onChange({ ...value, sortOrder: n }))}</div>
+        <div><label>{t("billing.col.totalConsumption")}</label>{numInput(value.totalConsumptionKwh, (n) => onChange({ ...value, totalConsumptionKwh: n }))}</div>
+        <div><label>{t("billing.col.heatingMeter")}</label>{numInput(value.heatPumpMeterReading, (n) => onChange({ ...value, heatPumpMeterReading: n }))}</div>
+        <div><label>{t("billing.form.sarahShare")}</label>{numInput(value.sarahSharePercent, (n) => onChange({ ...value, sarahSharePercent: n }))}</div>
       </div>
       <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
-        <button onClick={onSave}>Speichern</button>
-        <button className="secondary" onClick={onCancel}>Abbrechen</button>
+        <button onClick={onSave}>{t("action.save")}</button>
+        <button className="secondary" onClick={onCancel}>{t("action.cancel")}</button>
       </div>
     </div>
   );
@@ -182,6 +185,7 @@ function BillsEditor({
   onChanged: () => void;
   onError: (m: string) => void;
 }) {
+  const { t } = useI18n();
   const [adding, setAdding] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<MonthlyBillInput>(emptyBill);
@@ -203,7 +207,7 @@ function BillsEditor({
     } catch (e) { onError((e as Error).message); }
   }
   async function del(id: number) {
-    if (!confirm("Monatsrechnung löschen?")) return;
+    if (!confirm(t("billing.bills.confirmDelete"))) return;
     try { await api.del(`/api/billing-periods/${period.id}/bills/${id}`); onChanged(); }
     catch (e) { onError((e as Error).message); }
   }
@@ -211,12 +215,12 @@ function BillsEditor({
   return (
     <div>
       <div className="toolbar" style={{ margin: "0.25rem 0" }}>
-        <strong>Monatsrechnungen</strong>
-        {isAdmin && !adding && editId === null && <button className="small" onClick={startAdd}>+ Monat</button>}
+        <strong>{t("billing.bills.title")}</strong>
+        {isAdmin && !adding && editId === null && <button className="small" onClick={startAdd}>{t("billing.bills.addMonth")}</button>}
       </div>
       <table>
         <thead>
-          <tr><th>Monat</th><th>Kosten</th><th>Verbrauch (kWh)</th><th>Kommentar</th>{isAdmin && <th></th>}</tr>
+          <tr><th>{t("billing.bills.col.month")}</th><th>{t("billing.bills.col.cost")}</th><th>{t("billing.bills.col.consumption")}</th><th>{t("billing.bills.col.comment")}</th>{isAdmin && <th></th>}</tr>
         </thead>
         <tbody>
           {period.monthlyBills.map((b) => (
@@ -234,7 +238,7 @@ function BillsEditor({
             </tr>
           ))}
           {period.monthlyBills.length === 0 && (
-            <tr><td colSpan={isAdmin ? 5 : 4} className="muted">Keine Rechnungen.</td></tr>
+            <tr><td colSpan={isAdmin ? 5 : 4} className="muted">{t("billing.bills.none")}</td></tr>
           )}
         </tbody>
       </table>
@@ -242,17 +246,17 @@ function BillsEditor({
       {(adding || editId !== null) && (
         <div className="card" style={{ marginTop: "0.75rem" }}>
           <div className="form-grid">
-            <div><label>Monat</label><input value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} /></div>
-            <div><label>Reihenfolge</label>{numInput(form.sortOrder, (n) => setForm({ ...form, sortOrder: n }))}</div>
-            <div><label>Kosten (€)</label>{numInput(form.cost, (n) => setForm({ ...form, cost: n }))}</div>
-            <div><label>Verbrauch (kWh, optional)</label>
+            <div><label>{t("billing.bills.col.month")}</label><input value={form.month} onChange={(e) => setForm({ ...form, month: e.target.value })} /></div>
+            <div><label>{t("field.order")}</label>{numInput(form.sortOrder, (n) => setForm({ ...form, sortOrder: n }))}</div>
+            <div><label>{t("billing.bills.form.cost")}</label>{numInput(form.cost, (n) => setForm({ ...form, cost: n }))}</div>
+            <div><label>{t("billing.bills.form.consumption")}</label>
               <input type="number" step="any" value={form.consumption ?? ""} onChange={(e) => setForm({ ...form, consumption: e.target.value === "" ? null : parseFloat(e.target.value) })} />
             </div>
-            <div><label>Kommentar</label><input value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value || null })} /></div>
+            <div><label>{t("billing.bills.col.comment")}</label><input value={form.comment ?? ""} onChange={(e) => setForm({ ...form, comment: e.target.value || null })} /></div>
           </div>
           <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
-            <button className="small" onClick={save}>Speichern</button>
-            <button className="secondary small" onClick={() => { setAdding(false); setEditId(null); }}>Abbrechen</button>
+            <button className="small" onClick={save}>{t("action.save")}</button>
+            <button className="secondary small" onClick={() => { setAdding(false); setEditId(null); }}>{t("action.cancel")}</button>
           </div>
         </div>
       )}

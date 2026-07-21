@@ -27,7 +27,9 @@ public class AuthController : ControllerBase
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
         if (user is null || !PasswordHasher.Verify(request.Password, user.PasswordHash))
-            return Unauthorized(new { message = "Benutzername oder Passwort ist falsch." });
+        {
+            return Unauthorized(new { message = "Username or password is incorrect." });
+        }
 
         return _tokens.CreateToken(user);
     }

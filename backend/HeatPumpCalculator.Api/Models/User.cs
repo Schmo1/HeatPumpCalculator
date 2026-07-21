@@ -6,7 +6,7 @@ public static class Roles
     public const string Reader = "Reader";
 }
 
-/// <summary>Benutzer für die Anmeldung. Admin darf schreiben, Reader nur lesen.</summary>
+/// <summary>User for authentication. Admin may write, Reader may only read.</summary>
 public class User
 {
     public int Id { get; set; }

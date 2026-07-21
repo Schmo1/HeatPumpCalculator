@@ -8,25 +8,27 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------- Konfiguration ----------
+// ---------- Configuration ----------
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 
 if (string.IsNullOrWhiteSpace(jwtOptions.Key) || jwtOptions.Key.Length < 32)
+{
     throw new InvalidOperationException(
-        "Jwt:Key muss gesetzt sein und mindestens 32 Zeichen lang sein (z.B. per Umgebungsvariable Jwt__Key).");
+        "Jwt:Key must be set and at least 32 characters long (e.g. via the environment variable Jwt__Key).");
+}
 
-// ---------- Datenbank (SQLite) ----------
+// ---------- Database (SQLite) ----------
 var connectionString = builder.Configuration.GetConnectionString("Default")
     ?? "Data Source=/data/heatpump.db";
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlite(connectionString));
 
-// ---------- Dienste ----------
+// ---------- Services ----------
 builder.Services.AddScoped<CalculationService>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddControllers();
 
-// ---------- Authentifizierung / Autorisierung ----------
+// ---------- Authentication / Authorization ----------
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -50,14 +52,18 @@ var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<st
 builder.Services.AddCors(o => o.AddDefaultPolicy(policy =>
 {
     if (corsOrigins.Length > 0)
+    {
         policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod();
+    }
     else
+    {
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    }
 }));
 
 var app = builder.Build();
 
-// ---------- Migration + Seeding ----------
+// ---------- Migration + seeding ----------
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

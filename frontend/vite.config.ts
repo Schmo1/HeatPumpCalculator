@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Im Dev-Modus werden /api-Aufrufe an das lokale Backend (Port 5099) weitergeleitet.
-// In Produktion übernimmt nginx das Proxying (siehe nginx.conf).
+// In dev mode, /api calls are proxied to the local backend (port 5099).
+// In production, nginx handles the proxying (see nginx.conf).
 export default defineConfig({
   plugins: [react()],
   server: {

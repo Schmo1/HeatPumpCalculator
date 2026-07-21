@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<StoredUser | null>(loadUser);
 
   useEffect(() => {
-    // Bei 401 automatisch abmelden.
+    // Automatically sign out on 401.
     setUnauthorizedHandler(() => {
       setToken(null);
       localStorage.removeItem(USER_KEY);
@@ -69,6 +69,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthState {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth muss innerhalb von AuthProvider verwendet werden.");
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider.");
   return ctx;
 }

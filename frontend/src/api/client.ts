@@ -15,7 +15,7 @@ export class ApiError extends Error {
   }
 }
 
-/** Wird ausgelöst, wenn das Token abgelaufen/ungültig ist (401). */
+/** Triggered when the token has expired/is invalid (401). */
 let onUnauthorized: (() => void) | null = null;
 export function setUnauthorizedHandler(fn: () => void) {
   onUnauthorized = fn;
@@ -35,11 +35,11 @@ async function request<T>(method: string, url: string, body?: unknown): Promise<
 
   if (res.status === 401) {
     onUnauthorized?.();
-    throw new ApiError(401, "Nicht angemeldet.");
+    throw new ApiError(401, "Not signed in.");
   }
 
   if (!res.ok) {
-    let message = `Fehler ${res.status}`;
+    let message = `Error ${res.status}`;
     try {
       const data = await res.json();
       if (data?.message) message = data.message;

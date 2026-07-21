@@ -1,18 +1,18 @@
 namespace HeatPumpCalculator.Api.Dtos;
 
-/// <summary>Wasser-Zeitraum inkl. berechneter Verbräuche und Verhältnisse – Ausgabe.</summary>
+/// <summary>Water period including computed consumption and ratios – output.</summary>
 public record WaterPeriodDto(
     int Id,
     string Label,
     int SortOrder,
     bool IsBaseline,
-    // Zählerstände (Eingabe):
+    // meter readings (input):
     double? TotalMeterReading,
     double? DavidColdReading,
     double? DavidWarmReading,
     double? SarahColdReading,
     double? SarahWarmReading,
-    // berechnet:
+    // computed:
     double? TotalConsumption,
     double? DavidCold,
     double? DavidWarm,
@@ -23,7 +23,7 @@ public record WaterPeriodDto(
     double? SarahWarmRatioPercent,
     double? SarahTotalRatioPercent);
 
-/// <summary>Wasser-Zeitraum – Eingabe.</summary>
+/// <summary>Water period – input.</summary>
 public record WaterPeriodInputDto(
     string Label,
     int SortOrder,

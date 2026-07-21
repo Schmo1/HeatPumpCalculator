@@ -1,8 +1,8 @@
 namespace HeatPumpCalculator.Api.Models;
 
 /// <summary>
-/// Eine einzelne Monatsrechnung (Strom) innerhalb eines Abrechnungszeitraums.
-/// Entspricht einer Zeile in den Excel-Blättern "Kosten YYYY".
+/// A single monthly bill (electricity) within a billing period.
+/// Corresponds to a row in the Excel sheets "Kosten YYYY".
 /// </summary>
 public class MonthlyBill
 {
@@ -11,18 +11,18 @@ public class MonthlyBill
     public int BillingPeriodId { get; set; }
     public BillingPeriod? BillingPeriod { get; set; }
 
-    /// <summary>Reihenfolge innerhalb des Zeitraums.</summary>
+    /// <summary>Order within the period.</summary>
     public int SortOrder { get; set; }
 
-    /// <summary>Monatsbezeichnung, z.B. "Januar".</summary>
+    /// <summary>Month label, e.g. "January".</summary>
     public string Month { get; set; } = string.Empty;
 
-    /// <summary>Rechnungsbetrag in Euro.</summary>
+    /// <summary>Bill amount in euros.</summary>
     public double Cost { get; set; }
 
-    /// <summary>Optionaler Stromverbrauch dieses Monats in kWh.</summary>
+    /// <summary>Optional electricity consumption for this month in kWh.</summary>
     public double? Consumption { get; set; }
 
-    /// <summary>Optionaler Kommentar.</summary>
+    /// <summary>Optional comment.</summary>
     public string? Comment { get; set; }
 }

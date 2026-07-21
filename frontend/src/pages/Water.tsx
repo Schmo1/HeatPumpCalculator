@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { useI18n } from "../i18n/LanguageContext";
 import type { WaterPeriod, WaterPeriodInput } from "../types";
 import { num, pct } from "../utils/format";
 
@@ -12,6 +13,7 @@ const empty: WaterPeriodInput = {
 
 export default function Water() {
   const { isAdmin } = useAuth();
+  const { t } = useI18n();
   const [rows, setRows] = useState<WaterPeriod[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,49 +50,46 @@ export default function Water() {
     } catch (e) { setError((e as Error).message); }
   }
   async function del(id: number) {
-    if (!confirm("Wasser-Zeitraum löschen?")) return;
+    if (!confirm(t("water.confirmDelete"))) return;
     try { await api.del(`/api/water-periods/${id}`); await load(); }
     catch (e) { setError((e as Error).message); }
   }
 
-  if (loading) return <p className="muted">Lädt…</p>;
+  if (loading) return <p className="muted">{t("common.loading")}</p>;
 
   return (
     <>
       <div className="toolbar">
         <div>
-          <h1>Wasser</h1>
-          <p className="subtitle">
-            Zählerstände kalt/warm je Wohnung. Sarahs Zähler zählen rückwärts ab 100000.
-            Berechnete Spalten sind blau hervorgehoben.
-          </p>
+          <h1>{t("water.title")}</h1>
+          <p className="subtitle">{t("water.subtitle")}</p>
         </div>
-        {isAdmin && !adding && editId === null && <button onClick={startAdd}>+ Zeitraum</button>}
+        {isAdmin && !adding && editId === null && <button onClick={startAdd}>{t("period.add")}</button>}
       </div>
       {error && <div className="error">{error}</div>}
 
       {(adding || editId !== null) && (
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>{editId ? "Zeitraum bearbeiten" : "Neuer Zeitraum"}</h3>
+          <h3 style={{ marginTop: 0 }}>{editId ? t("period.edit") : t("period.new")}</h3>
           <div className="form-grid">
-            <div><label>Bezeichnung</label><input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></div>
-            <div><label>Reihenfolge</label><input type="number" step="any" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: parseFloat(e.target.value) || 0 })} /></div>
+            <div><label>{t("field.label")}</label><input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} /></div>
+            <div><label>{t("field.order")}</label><input type="number" step="any" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: parseFloat(e.target.value) || 0 })} /></div>
             <div>
-              <label>Basiszeile (Init)</label>
+              <label>{t("water.baselineOption")}</label>
               <select value={form.isBaseline ? "1" : "0"} onChange={(e) => setForm({ ...form, isBaseline: e.target.value === "1" })}>
-                <option value="0">Nein</option>
-                <option value="1">Ja</option>
+                <option value="0">{t("common.no")}</option>
+                <option value="1">{t("common.yes")}</option>
               </select>
             </div>
-            <NumField label="Zählerstand gesamt" v={form.totalMeterReading} set={(n) => setForm({ ...form, totalMeterReading: n })} />
-            <NumField label="Kalt David" v={form.davidColdReading} set={(n) => setForm({ ...form, davidColdReading: n })} />
-            <NumField label="Warm David" v={form.davidWarmReading} set={(n) => setForm({ ...form, davidWarmReading: n })} />
-            <NumField label="Kalt Sarah" v={form.sarahColdReading} set={(n) => setForm({ ...form, sarahColdReading: n })} />
-            <NumField label="Warm Sarah" v={form.sarahWarmReading} set={(n) => setForm({ ...form, sarahWarmReading: n })} />
+            <NumField label={t("water.form.totalMeter")} v={form.totalMeterReading} set={(n) => setForm({ ...form, totalMeterReading: n })} />
+            <NumField label={t("water.form.coldDavid")} v={form.davidColdReading} set={(n) => setForm({ ...form, davidColdReading: n })} />
+            <NumField label={t("water.form.warmDavid")} v={form.davidWarmReading} set={(n) => setForm({ ...form, davidWarmReading: n })} />
+            <NumField label={t("water.form.coldSarah")} v={form.sarahColdReading} set={(n) => setForm({ ...form, sarahColdReading: n })} />
+            <NumField label={t("water.form.warmSarah")} v={form.sarahWarmReading} set={(n) => setForm({ ...form, sarahWarmReading: n })} />
           </div>
           <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem" }}>
-            <button onClick={save}>Speichern</button>
-            <button className="secondary" onClick={() => { setAdding(false); setEditId(null); }}>Abbrechen</button>
+            <button onClick={save}>{t("action.save")}</button>
+            <button className="secondary" onClick={() => { setAdding(false); setEditId(null); }}>{t("action.cancel")}</button>
           </div>
         </div>
       )}
@@ -99,19 +98,19 @@ export default function Water() {
         <table>
           <thead>
             <tr>
-              <th>Zeitraum</th>
-              <th>Zähler gesamt</th>
-              <th>Verbrauch gesamt</th>
-              <th>David kalt</th><th>David warm</th><th>David gesamt</th>
-              <th>Sarah kalt</th><th>Sarah warm</th><th>Sarah gesamt</th>
-              <th>Warmw.-Anteil Sarah</th><th>Gesamt-Anteil Sarah</th>
+              <th>{t("water.col.period")}</th>
+              <th>{t("water.col.totalMeter")}</th>
+              <th>{t("water.col.totalConsumption")}</th>
+              <th>{t("water.col.davidCold")}</th><th>{t("water.col.davidWarm")}</th><th>{t("water.col.davidTotal")}</th>
+              <th>{t("water.col.sarahCold")}</th><th>{t("water.col.sarahWarm")}</th><th>{t("water.col.sarahTotal")}</th>
+              <th>{t("water.col.sarahHotShare")}</th><th>{t("water.col.sarahTotalShare")}</th>
               {isAdmin && <th></th>}
             </tr>
           </thead>
           <tbody>
             {rows.map((w) => (
               <tr key={w.id} style={w.isBaseline ? { color: "var(--muted)" } : undefined}>
-                <td>{w.label}{w.isBaseline && " (Basis)"}</td>
+                <td>{w.label}{w.isBaseline && ` ${t("water.baselineTag")}`}</td>
                 <td>{num(w.totalMeterReading)}</td>
                 <td className="computed">{num(w.totalConsumption)}</td>
                 <td className="computed">{num(w.davidCold)}</td>

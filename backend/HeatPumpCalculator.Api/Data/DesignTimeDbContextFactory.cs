@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore.Design;
 namespace HeatPumpCalculator.Api.Data;
 
 /// <summary>
-/// Wird nur von den EF-Core-Tools zur Entwurfszeit (Migrationen) verwendet,
-/// damit dafür nicht der komplette Web-Host gestartet werden muss.
+/// Used only by the EF Core tools at design time (migrations),
+/// so that the full web host does not need to be started for that.
 /// </summary>
 public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {

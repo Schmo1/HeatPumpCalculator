@@ -1,33 +1,33 @@
 namespace HeatPumpCalculator.Api.Models;
 
 /// <summary>
-/// Entspricht einer Zeile im Excel-Blatt "Abrechnung" (ein Abrechnungszeitraum,
-/// i.d.R. ein Halbjahr). Enthält nur die vom Admin eingegebenen Werte -
-/// alle abgeleiteten Größen (Verbrauch Heizung, Kostenaufteilung) werden im
-/// CalculationService berechnet.
+/// Corresponds to a row in the Excel sheet "Abrechnung" (a billing period,
+/// usually a half-year). Contains only the values entered by the admin -
+/// all derived quantities (heating consumption, cost split) are computed in
+/// the CalculationService.
 /// </summary>
 public class BillingPeriod
 {
     public int Id { get; set; }
 
-    /// <summary>Bezeichnung des Zeitraums, z.B. "2024" oder "2025/1".</summary>
+    /// <summary>Label of the period, e.g. "2024" or "2025/1".</summary>
     public string Label { get; set; } = string.Empty;
 
-    /// <summary>Reihenfolge der Zeiträume (chronologisch aufsteigend).</summary>
+    /// <summary>Order of the periods (chronologically ascending).</summary>
     public int SortOrder { get; set; }
 
-    /// <summary>Verbrauch Gesamt am Hauptzähler in kWh (Wärmepumpe + Wohnung 1).</summary>
+    /// <summary>Total consumption at the main meter in kWh (heat pump + apartment 1).</summary>
     public double TotalConsumptionKwh { get; set; }
 
-    /// <summary>Zählerstand des Wärmepumpen-Subzählers in kWh (kumuliert).</summary>
+    /// <summary>Reading of the heat pump sub-meter in kWh (cumulative).</summary>
     public double HeatPumpMeterReading { get; set; }
 
     /// <summary>
-    /// Anteil von Wohnung 2 (Sarah) an den Heizkosten in Prozent.
-    /// Stammt i.d.R. aus dem Warmwasser-Verhältnis (siehe WaterPeriod).
+    /// Share of apartment 2 (Sarah) in the heating costs, in percent.
+    /// Usually derived from the hot water ratio (see WaterPeriod).
     /// </summary>
     public double SarahSharePercent { get; set; }
 
-    /// <summary>Monatsrechnungen (Strom) für diesen Zeitraum.</summary>
+    /// <summary>Monthly bills (electricity) for this period.</summary>
     public List<MonthlyBill> MonthlyBills { get; set; } = new();
 }

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.SDK/1.0.1184077">
+  <PropertyGroup>
+    <!-- Wraps the existing Vite/npm project so it shows up in the VS solution.
+         The actual build tooling stays npm/Vite; VS just calls these commands. -->
+    <StartupCommand>npm run dev</StartupCommand>
+    <BuildCommand>npm run build</BuildCommand>
+    <ProductionBuildCommand>npm run build</ProductionBuildCommand>
+    <!-- Vite emits the production bundle here. -->
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
+    <ShouldRunNpmInstall>true</ShouldRunNpmInstall>
+  </PropertyGroup>
+</Project>

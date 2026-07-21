@@ -10,7 +10,7 @@ namespace HeatPumpCalculator.Api.Controllers;
 
 [ApiController]
 [Route("api/billing-periods")]
-[Authorize] // Lesen: jeder angemeldete Nutzer
+[Authorize] // Reading: any authenticated user
 public class BillingPeriodsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -57,7 +57,10 @@ public class BillingPeriodsController : ControllerBase
     public async Task<ActionResult<BillingPeriodDto>> Update(int id, BillingPeriodInputDto input)
     {
         var entity = await _db.BillingPeriods.FindAsync(id);
-        if (entity is null) return NotFound();
+        if (entity is null)
+        {
+            return NotFound();
+        }
 
         entity.Label = input.Label;
         entity.SortOrder = input.SortOrder;
@@ -74,20 +77,26 @@ public class BillingPeriodsController : ControllerBase
     public async Task<IActionResult> Delete(int id)
     {
         var entity = await _db.BillingPeriods.FindAsync(id);
-        if (entity is null) return NotFound();
+        if (entity is null)
+        {
+            return NotFound();
+        }
         _db.BillingPeriods.Remove(entity);
         await _db.SaveChangesAsync();
         return NoContent();
     }
 
-    // ---------- Monatsrechnungen (verschachtelt) ----------
+    // ---------- Monthly bills (nested) ----------
 
     [HttpPost("{id:int}/bills")]
     [Authorize(Roles = Roles.Admin)]
     public async Task<ActionResult<BillingPeriodDto>> AddBill(int id, MonthlyBillInputDto input)
     {
         var period = await _db.BillingPeriods.FindAsync(id);
-        if (period is null) return NotFound();
+        if (period is null)
+        {
+            return NotFound();
+        }
 
         _db.MonthlyBills.Add(new MonthlyBill
         {
@@ -107,7 +116,10 @@ public class BillingPeriodsController : ControllerBase
     public async Task<ActionResult<BillingPeriodDto>> UpdateBill(int id, int billId, MonthlyBillInputDto input)
     {
         var bill = await _db.MonthlyBills.FirstOrDefaultAsync(b => b.Id == billId && b.BillingPeriodId == id);
-        if (bill is null) return NotFound();
+        if (bill is null)
+        {
+            return NotFound();
+        }
 
         bill.SortOrder = input.SortOrder;
         bill.Month = input.Month;
@@ -123,7 +135,10 @@ public class BillingPeriodsController : ControllerBase
     public async Task<IActionResult> DeleteBill(int id, int billId)
     {
         var bill = await _db.MonthlyBills.FirstOrDefaultAsync(b => b.Id == billId && b.BillingPeriodId == id);
-        if (bill is null) return NotFound();
+        if (bill is null)
+        {
+            return NotFound();
+        }
         _db.MonthlyBills.Remove(bill);
         await _db.SaveChangesAsync();
         return NoContent();
