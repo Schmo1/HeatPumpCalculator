@@ -71,6 +71,8 @@ const de: Dict = {
   "billing.bills.col.comment": "Kommentar",
   "billing.bills.form.cost": "Kosten (€)",
   "billing.bills.form.consumption": "Verbrauch (kWh, optional)",
+  "billing.bills.chart.cost": "Kosten pro Monat (€)",
+  "billing.bills.chart.consumption": "Verbrauch pro Monat (kWh)",
 
   // ----- water -----
   "water.title": "Wasser",
@@ -172,6 +174,8 @@ const en: Dict = {
   "billing.bills.col.comment": "Comment",
   "billing.bills.form.cost": "Cost (€)",
   "billing.bills.form.consumption": "Consumption (kWh, optional)",
+  "billing.bills.chart.cost": "Cost per month (€)",
+  "billing.bills.chart.consumption": "Consumption per month (kWh)",
 
   // ----- water -----
   "water.title": "Water",

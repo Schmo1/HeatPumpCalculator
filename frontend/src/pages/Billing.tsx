@@ -1,8 +1,12 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from "recharts";
 import { api } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
-import type { BillingPeriod, BillingPeriodInput, MonthlyBillInput } from "../types";
+import { axisTick, barCursor, tooltipStyle } from "../charts/chrome";
+import type { BillingPeriod, BillingPeriodInput, MonthlyBill, MonthlyBillInput } from "../types";
 import { eur, num } from "../utils/format";
 
 const emptyPeriod: BillingPeriodInput = {
@@ -65,6 +69,8 @@ export default function Billing() {
 
   if (loading) return <p className="muted">{t("common.loading")}</p>;
 
+  const expandedPeriod = periods.find((p) => p.id === expanded) ?? null;
+
   return (
     <>
       <div className="toolbar">
@@ -104,44 +110,104 @@ export default function Billing() {
           </thead>
           <tbody>
             {periods.map((p) => (
-              <Fragment key={p.id}>
-                <tr>
+              <tr key={p.id} className={expanded === p.id ? "is-open" : undefined}>
+                <td>
+                  <button className="secondary small" onClick={() => setExpanded(expanded === p.id ? null : p.id)}>
+                    {expanded === p.id ? "▼" : "▶"}
+                  </button>{" "}
+                  {p.label}
+                </td>
+                <td>{num(p.totalConsumptionKwh)}</td>
+                <td>{num(p.heatPumpMeterReading)}</td>
+                <td className="computed">{num(p.heatPumpConsumption)}</td>
+                <td className="computed">{eur(p.davidTotalCost)}</td>
+                <td className="computed">{eur(p.heatingTotalCost)}</td>
+                <td>{num(p.sarahSharePercent)} %</td>
+                <td className="computed">{eur(p.davidHeatingCost)}</td>
+                <td className="computed">{eur(p.sarahHeatingCost)}</td>
+                {isAdmin && (
                   <td>
-                    <button className="secondary small" onClick={() => setExpanded(expanded === p.id ? null : p.id)}>
-                      {expanded === p.id ? "▼" : "▶"}
-                    </button>{" "}
-                    {p.label}
+                    <div className="row-actions">
+                      <button className="secondary small" onClick={() => startEdit(p)}>✎</button>
+                      <button className="danger small" onClick={() => deletePeriod(p.id)}>🗑</button>
+                    </div>
                   </td>
-                  <td>{num(p.totalConsumptionKwh)}</td>
-                  <td>{num(p.heatPumpMeterReading)}</td>
-                  <td className="computed">{num(p.heatPumpConsumption)}</td>
-                  <td className="computed">{eur(p.davidTotalCost)}</td>
-                  <td className="computed">{eur(p.heatingTotalCost)}</td>
-                  <td>{num(p.sarahSharePercent)} %</td>
-                  <td className="computed">{eur(p.davidHeatingCost)}</td>
-                  <td className="computed">{eur(p.sarahHeatingCost)}</td>
-                  {isAdmin && (
-                    <td>
-                      <div className="row-actions">
-                        <button className="secondary small" onClick={() => startEdit(p)}>✎</button>
-                        <button className="danger small" onClick={() => deletePeriod(p.id)}>🗑</button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-                {expanded === p.id && (
-                  <tr>
-                    <td colSpan={isAdmin ? 10 : 9} className="expanded-cell">
-                      <BillsEditor period={p} isAdmin={isAdmin} onChanged={load} onError={setError} />
-                    </td>
-                  </tr>
                 )}
-              </Fragment>
+              </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Detail lives outside the table: the row spans the full scroll width, which charts can't use. */}
+      {expandedPeriod && (
+        <div className="card detail-panel">
+          <h2>{expandedPeriod.label}</h2>
+          <MonthlyCharts bills={expandedPeriod.monthlyBills} />
+          <BillsEditor period={expandedPeriod} isAdmin={isAdmin} onChanged={load} onError={setError} />
+        </div>
+      )}
     </>
+  );
+}
+
+function MonthlyCharts({ bills }: { bills: MonthlyBill[] }) {
+  const { t } = useI18n();
+  if (bills.length === 0) return null;
+
+  const data = bills.map((b) => ({ name: b.month, cost: b.cost, consumption: b.consumption }));
+  const hasConsumption = bills.some((b) => b.consumption !== null);
+
+  // Euro and kWh are different scales, so they get their own plot each rather
+  // than a second y-axis, which would imply a correlation that isn't there.
+  return (
+    <div className="mini-chart-grid">
+      <MonthlyBarChart
+        title={t("billing.bills.chart.cost")}
+        data={data}
+        dataKey="cost"
+        format={eur}
+      />
+      {hasConsumption && (
+        <MonthlyBarChart
+          title={t("billing.bills.chart.consumption")}
+          data={data}
+          dataKey="consumption"
+          format={(v) => `${num(v)} kWh`}
+        />
+      )}
+    </div>
+  );
+}
+
+function MonthlyBarChart({
+  title, data, dataKey, format,
+}: {
+  title: string;
+  data: { name: string; cost: number; consumption: number | null }[];
+  dataKey: "cost" | "consumption";
+  format: (v: number) => string;
+}) {
+  return (
+    <div className="mini-chart">
+      <h3>{title}</h3>
+      <ResponsiveContainer width="100%" height={210}>
+        <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+          <CartesianGrid stroke="var(--grid)" vertical={false} />
+          <XAxis
+            dataKey="name" tick={axisTick} tickLine={false}
+            axisLine={{ stroke: "var(--border)" }} minTickGap={14}
+          />
+          <YAxis tick={axisTick} tickLine={false} axisLine={false} width={56} tickFormatter={num} />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            cursor={barCursor}
+            formatter={(v) => format(v as number)}
+          />
+          <Bar dataKey={dataKey} name={title} fill="var(--energy-heating)" maxBarSize={24} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -218,6 +284,7 @@ function BillsEditor({
         <strong>{t("billing.bills.title")}</strong>
         {isAdmin && !adding && editId === null && <button className="small" onClick={startAdd}>{t("billing.bills.addMonth")}</button>}
       </div>
+      <div className="table-wrap">
       <table>
         <thead>
           <tr><th>{t("billing.bills.col.month")}</th><th>{t("billing.bills.col.cost")}</th><th>{t("billing.bills.col.consumption")}</th><th>{t("billing.bills.col.comment")}</th>{isAdmin && <th></th>}</tr>
@@ -242,6 +309,7 @@ function BillsEditor({
           )}
         </tbody>
       </table>
+      </div>
 
       {(adding || editId !== null) && (
         <div className="card" style={{ marginTop: "0.75rem" }}>

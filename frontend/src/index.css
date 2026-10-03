@@ -297,7 +297,25 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: var(--surface-hover); }
 td.computed { color: var(--primary); font-weight: 550; }
 .row-actions { display: flex; gap: 0.3rem; justify-content: flex-end; }
-.expanded-cell { background: var(--surface-sunken); }
+tbody tr.is-open { background: var(--accent-wash); }
+tbody tr.is-open:hover { background: var(--accent-wash); }
+
+/* ---------- Period detail panel ---------- */
+.detail-panel { margin-top: 1rem; }
+.detail-panel > h2 { margin-top: 0; }
+.mini-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.mini-chart {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 0.6rem 0.4rem 0;
+  background: var(--surface);
+}
+.mini-chart h3 { margin: 0 0 0.7rem 0.9rem; font-size: 0.82rem; color: var(--text-secondary); }
 
 /* ---------- Buttons ---------- */
 button {
@@ -318,8 +336,17 @@ button.secondary {
   border-color: var(--border-strong);
 }
 button.secondary:hover { background: var(--surface-hover); }
-button.danger { background: var(--danger); }
-button.danger:hover { background: var(--danger-hover); }
+/* Destructive row actions stay quiet until aimed at */
+button.danger {
+  background: var(--surface);
+  color: var(--muted);
+  border-color: var(--border-strong);
+}
+button.danger:hover {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
 button.small {
   padding: 0.3rem 0.55rem;
   font-size: 0.78rem;
@@ -406,8 +433,6 @@ label {
   margin: 1.1rem 0 0;
 }
 
-.inline-edit td { background: var(--accent-wash); }
-
 /* ---------- Mobile (phones) ---------- */
 @media (max-width: 720px) {
   .topbar {
@@ -448,6 +473,8 @@ label {
   .chart-grid { grid-template-columns: 1fr; }
   .chart-card { padding: 1rem 0.6rem 0.5rem 0.2rem; }
   .chart-card h3 { margin-left: 0.8rem; }
+
+  .mini-chart-grid { grid-template-columns: 1fr; gap: 0.75rem; }
 
   .form-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
 
