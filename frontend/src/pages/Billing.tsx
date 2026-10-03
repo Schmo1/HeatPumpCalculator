@@ -131,7 +131,7 @@ export default function Billing() {
                 </tr>
                 {expanded === p.id && (
                   <tr>
-                    <td colSpan={isAdmin ? 10 : 9} style={{ background: "#f8fafc" }}>
+                    <td colSpan={isAdmin ? 10 : 9} className="expanded-cell">
                       <BillsEditor period={p} isAdmin={isAdmin} onChanged={load} onError={setError} />
                     </td>
                   </tr>
