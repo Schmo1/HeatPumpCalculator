@@ -1,0 +1,42 @@
+services:
+  api:
+    build:
+      context: ./backend/HeatPumpCalculator.Api
+    container_name: heatpump-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: "Data Source=/data/heatpump.db"
+      Jwt__Key: "${JWT_KEY:?JWT_KEY must be set in Portainer's environment variables (>= 32 characters)}"
+      Jwt__Issuer: "HeatPumpCalculator"
+      Jwt__Audience: "HeatPumpCalculator"
+      Jwt__ExpiryHours: "12"
+      Seed__AdminUsername: "${ADMIN_USERNAME:-admin}"
+      Seed__AdminPassword: "${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in Portainer's environment variables}"
+      Seed__ReaderUsername: "${READER_USERNAME:-viewer}"
+      Seed__ReaderPassword: "${READER_PASSWORD:?READER_PASSWORD must be set in Portainer's environment variables}"
+    volumes:
+      - heatpump-data:/data
+    restart: unless-stopped
+    networks:
+      - web
+
+  web:
+    build:
+      context: ./frontend
+    container_name: heatpump-web
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heatpump.rule=Host(`heizung.schmoranz.at`)"
+      - "traefik.http.services.heatpump.loadbalancer.server.port=80"
+
+networks:
+  web:
+    external: true
+
+volumes:
+  heatpump-data:
