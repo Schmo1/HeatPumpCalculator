@@ -48,7 +48,17 @@ a { color: var(--primary-dark); }
 }
 .topbar nav a.active, .topbar nav a:hover { background: var(--bg-soft); color: #fff; }
 .topbar .spacer { flex: 1; }
-.topbar .user { font-size: 0.85rem; color: #cbd5e1; }
+.topbar .user { font-size: 0.85rem; color: #cbd5e1; white-space: nowrap; }
+.topbar-collapsible { display: flex; align-items: center; gap: 1.5rem; flex: 1; }
+.menu-toggle {
+  display: none;
+  background: transparent;
+  color: #fff;
+  font-size: 1.3rem;
+  padding: 0.25rem 0.5rem;
+  margin-left: auto;
+}
+.menu-toggle:hover { background: var(--bg-soft); }
 .badge {
   font-size: 0.7rem;
   padding: 0.1rem 0.45rem;
@@ -167,3 +177,49 @@ label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0
 .hint { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 1rem; }
 
 .inline-edit td { background: #eff6ff; }
+
+/* ---------- Mobile (phones) ---------- */
+@media (max-width: 720px) {
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 56px;
+    padding: 0.5rem 1rem;
+  }
+  .menu-toggle { display: block; }
+  .topbar-collapsible {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .topbar-collapsible.open { display: flex; }
+  .topbar nav { flex-direction: column; gap: 0.15rem; }
+  .topbar nav a { padding: 0.6rem 0.75rem; }
+  .topbar .spacer { display: none; }
+  .topbar .lang-switch { justify-content: center; }
+  .topbar .user { text-align: center; }
+  .topbar-collapsible button.secondary { width: 100%; }
+
+  .container { padding: 1rem 0.85rem 2.5rem; }
+  h1 { font-size: 1.2rem; }
+
+  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .kpi .value { font-size: 1.2rem; }
+
+  .chart-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+  .form-grid { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+  table { font-size: 0.78rem; }
+  th, td { padding: 0.4rem 0.45rem; }
+
+  .toolbar { flex-wrap: wrap; }
+}
+
+@media (max-width: 420px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
