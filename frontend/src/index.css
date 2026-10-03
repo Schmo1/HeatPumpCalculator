@@ -257,6 +257,9 @@ h3 {
 .chart-card { padding: 1.25rem 1.1rem 0.75rem 0.6rem; }
 .chart-card h3 { margin: 0 0 0.9rem 0.8rem; }
 
+/* Full-width stacked charts: a timeline needs the length */
+.history-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
 /* ---------- Tables ---------- */
 .table-wrap {
   overflow-x: auto;

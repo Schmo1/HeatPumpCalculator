@@ -163,14 +163,14 @@ function MonthlyCharts({ bills }: { bills: MonthlyBill[] }) {
   return (
     <div className="mini-chart-grid">
       <MonthlyBarChart
-        title={t("billing.bills.chart.cost")}
+        title={t("chart.costPerMonth")}
         data={data}
         dataKey="cost"
         format={eur}
       />
       {hasConsumption && (
         <MonthlyBarChart
-          title={t("billing.bills.chart.consumption")}
+          title={t("chart.consumptionPerMonth")}
           data={data}
           dataKey="consumption"
           format={(v) => `${num(v)} kWh`}

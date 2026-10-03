@@ -57,6 +57,17 @@ export default function Dashboard() {
     totalPct: w.sarahTotalRatioPercent,
   }));
 
+  // Every monthly bill across all periods, in one continuous timeline. The
+  // month field is free text, so ordering comes from the explicit sortOrders.
+  const historyData = [...billing]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .flatMap((p) =>
+      [...p.monthlyBills]
+        .sort((x, y) => x.sortOrder - y.sortOrder)
+        .map((b) => ({ name: b.month, cost: b.cost, consumption: b.consumption }))
+    );
+  const historyHasConsumption = historyData.some((d) => d.consumption !== null);
+
   return (
     <>
       <h1>{t("dashboard.title")}</h1>
@@ -171,6 +182,63 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {historyData.length > 0 && (
+        <>
+          <h2>{t("dashboard.history.title")}</h2>
+          <p className="subtitle">{t("dashboard.history.subtitle")}</p>
+          <div className="history-grid">
+            <HistoryChart title={t("chart.costPerMonth")} data={historyData} dataKey="cost" format={eur} />
+            {historyHasConsumption && (
+              <HistoryChart
+                title={t("chart.consumptionPerMonth")}
+                data={historyData}
+                dataKey="consumption"
+                format={(v) => `${num(v)} kWh`}
+              />
+            )}
+          </div>
+        </>
+      )}
     </>
+  );
+}
+
+function HistoryChart({
+  title, data, dataKey, format,
+}: {
+  title: string;
+  data: { name: string; cost: number; consumption: number | null }[];
+  dataKey: "cost" | "consumption";
+  format: (v: number) => string;
+}) {
+  // Dots turn into noise once the timeline gets long; hover still marks the point.
+  const dotStyle = { r: 4, fill: "var(--energy-heating)", stroke: "var(--surface)", strokeWidth: 2 };
+
+  return (
+    <div className="card chart-card">
+      <h3>{title}</h3>
+      <ResponsiveContainer width="100%" height={240}>
+        <LineChart data={data} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
+          <CartesianGrid stroke="var(--grid)" vertical={false} />
+          <XAxis
+            dataKey="name" tick={axisTick} tickLine={false}
+            axisLine={{ stroke: "var(--border)" }} minTickGap={24}
+          />
+          <YAxis tick={axisTick} tickLine={false} axisLine={false} width={56} tickFormatter={num} />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+            formatter={(v) => format(v as number)}
+          />
+          <Line
+            type="monotone" dataKey={dataKey} name={title}
+            stroke="var(--energy-heating)" strokeWidth={2} strokeLinecap="round"
+            dot={data.length <= 14 ? dotStyle : false}
+            activeDot={{ ...dotStyle, r: 5 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

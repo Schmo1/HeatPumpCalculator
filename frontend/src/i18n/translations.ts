@@ -71,8 +71,8 @@ const de: Dict = {
   "billing.bills.col.comment": "Kommentar",
   "billing.bills.form.cost": "Kosten (€)",
   "billing.bills.form.consumption": "Verbrauch (kWh, optional)",
-  "billing.bills.chart.cost": "Kosten pro Monat (€)",
-  "billing.bills.chart.consumption": "Verbrauch pro Monat (kWh)",
+  "chart.costPerMonth": "Kosten pro Monat (€)",
+  "chart.consumptionPerMonth": "Verbrauch pro Monat (kWh)",
 
   // ----- water -----
   "water.title": "Wasser",
@@ -112,6 +112,8 @@ const de: Dict = {
   "dashboard.chart.costSplit": "Heizkosten-Aufteilung (€)",
   "dashboard.chart.waterPerApt": "Wasserverbrauch je Wohnung (m³)",
   "dashboard.chart.sarahWaterShare": "Sarahs Anteil am Wasser (%)",
+  "dashboard.history.title": "Verlauf aller Monate",
+  "dashboard.history.subtitle": "Alle erfassten Monatsrechnungen über sämtliche Abrechnungszeiträume hinweg.",
   "series.heating": "Heizung",
   "series.total": "Gesamt",
   "series.david": "David",
@@ -174,8 +176,8 @@ const en: Dict = {
   "billing.bills.col.comment": "Comment",
   "billing.bills.form.cost": "Cost (€)",
   "billing.bills.form.consumption": "Consumption (kWh, optional)",
-  "billing.bills.chart.cost": "Cost per month (€)",
-  "billing.bills.chart.consumption": "Consumption per month (kWh)",
+  "chart.costPerMonth": "Cost per month (€)",
+  "chart.consumptionPerMonth": "Consumption per month (kWh)",
 
   // ----- water -----
   "water.title": "Water",
@@ -215,6 +217,8 @@ const en: Dict = {
   "dashboard.chart.costSplit": "Heating cost split (€)",
   "dashboard.chart.waterPerApt": "Water consumption per apartment (m³)",
   "dashboard.chart.sarahWaterShare": "Sarah's water share (%)",
+  "dashboard.history.title": "Full monthly history",
+  "dashboard.history.subtitle": "Every recorded monthly bill across all billing periods.",
   "series.heating": "Heating",
   "series.total": "Total",
   "series.david": "David",
