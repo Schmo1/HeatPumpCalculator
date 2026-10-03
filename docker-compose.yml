@@ -2,6 +2,7 @@ services:
   api:
     build:
       context: ./backend/HeatPumpCalculator.Api
+    container_name: heatpump-api
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__Default: "Data Source=/data/heatpump.db"
