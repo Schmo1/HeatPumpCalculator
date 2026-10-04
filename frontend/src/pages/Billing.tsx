@@ -70,6 +70,7 @@ export default function Billing() {
   if (loading) return <p className="muted">{t("common.loading")}</p>;
 
   const expandedPeriod = periods.find((p) => p.id === expanded) ?? null;
+  const editingPeriod = periods.find((p) => p.id === editId) ?? null;
 
   return (
     <>
@@ -89,6 +90,7 @@ export default function Billing() {
           onSave={savePeriod}
           onCancel={() => { setAdding(false); setEditId(null); }}
           title={editId ? t("period.edit") : t("period.new")}
+          derivedTotal={editingPeriod?.totalConsumptionIsDerived ? editingPeriod.totalConsumptionKwh : null}
         />
       )}
 
@@ -117,7 +119,9 @@ export default function Billing() {
                   </button>{" "}
                   {p.label}
                 </td>
-                <td>{num(p.totalConsumptionKwh)}</td>
+                <td className={p.totalConsumptionIsDerived ? "computed" : undefined}>
+                  {num(p.totalConsumptionKwh)}
+                </td>
                 <td>{num(p.heatPumpMeterReading)}</td>
                 <td className="computed">{num(p.heatPumpConsumption)}</td>
                 <td className="computed">{eur(p.davidTotalCost)}</td>
@@ -143,6 +147,11 @@ export default function Billing() {
       {expandedPeriod && (
         <div className="card detail-panel">
           <h2>{expandedPeriod.label}</h2>
+          {expandedPeriod.monthsMissingConsumption > 0 && (
+            <div className="warn">
+              {t("billing.warn.missingConsumption", { count: expandedPeriod.monthsMissingConsumption })}
+            </div>
+          )}
           <MonthlyCharts bills={expandedPeriod.monthlyBills} />
           <BillsEditor period={expandedPeriod} isAdmin={isAdmin} onChanged={load} onError={setError} />
         </div>
@@ -216,13 +225,15 @@ function numInput(v: number, set: (n: number) => void) {
 }
 
 function PeriodForm({
-  value, onChange, onSave, onCancel, title,
+  value, onChange, onSave, onCancel, title, derivedTotal,
 }: {
   value: BillingPeriodInput;
   onChange: (v: BillingPeriodInput) => void;
   onSave: () => void;
   onCancel: () => void;
   title: string;
+  /** Set when the period's months already determine the total, which then can't be typed. */
+  derivedTotal: number | null;
 }) {
   const { t } = useI18n();
   return (
@@ -231,7 +242,15 @@ function PeriodForm({
       <div className="form-grid">
         <div><label>{t("field.label")}</label><input value={value.label} onChange={(e) => onChange({ ...value, label: e.target.value })} /></div>
         <div><label>{t("field.order")}</label>{numInput(value.sortOrder, (n) => onChange({ ...value, sortOrder: n }))}</div>
-        <div><label>{t("billing.col.totalConsumption")}</label>{numInput(value.totalConsumptionKwh, (n) => onChange({ ...value, totalConsumptionKwh: n }))}</div>
+        <div>
+          <label>{t("billing.col.totalConsumption")}</label>
+          {derivedTotal === null
+            ? numInput(value.totalConsumptionKwh, (n) => onChange({ ...value, totalConsumptionKwh: n }))
+            : <input value={num(derivedTotal)} readOnly disabled />}
+          <small className="field-hint">
+            {derivedTotal === null ? t("billing.form.totalManualHint") : t("billing.form.totalFromMonths")}
+          </small>
+        </div>
         <div><label>{t("billing.col.heatingMeter")}</label>{numInput(value.heatPumpMeterReading, (n) => onChange({ ...value, heatPumpMeterReading: n }))}</div>
         <div><label>{t("billing.form.sarahShare")}</label>{numInput(value.sarahSharePercent, (n) => onChange({ ...value, sarahSharePercent: n }))}</div>
       </div>

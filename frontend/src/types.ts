@@ -11,9 +11,14 @@ export interface BillingPeriod {
   id: number;
   label: string;
   sortOrder: number;
+  /** Summed from the monthly bills, or the stored fallback for older periods. */
   totalConsumptionKwh: number;
   heatPumpMeterReading: number;
   // computed:
+  /** True when totalConsumptionKwh came from the monthly bills. */
+  totalConsumptionIsDerived: boolean;
+  /** Months lacking a consumption value, which leave the derived total short. */
+  monthsMissingConsumption: number;
   heatPumpConsumption: number;
   davidTotalCost: number;
   heatingTotalCost: number;

@@ -27,6 +27,7 @@ const de: Dict = {
   "action.save": "Speichern",
   "action.cancel": "Abbrechen",
   "action.menu": "Menü",
+  "action.theme": "Hell / Dunkel umschalten",
   "common.loading": "Lädt…",
   "common.yes": "Ja",
   "common.no": "Nein",
@@ -73,6 +74,10 @@ const de: Dict = {
   "billing.bills.form.consumption": "Verbrauch (kWh, optional)",
   "chart.costPerMonth": "Kosten pro Monat (€)",
   "chart.consumptionPerMonth": "Verbrauch pro Monat (kWh)",
+  "billing.form.totalFromMonths": "Ergibt sich aus den Monatsrechnungen",
+  "billing.form.totalManualHint": "Wird verwendet, solange kein Monat einen Verbrauch hat.",
+  "billing.warn.missingConsumption":
+    "{count} Monat(e) ohne Verbrauchsangabe. Der Gesamtverbrauch ist dadurch zu niedrig und die Heizkosten fallen zu hoch aus.",
 
   // ----- water -----
   "water.title": "Wasser",
@@ -132,6 +137,7 @@ const en: Dict = {
   "action.save": "Save",
   "action.cancel": "Cancel",
   "action.menu": "Menu",
+  "action.theme": "Toggle light / dark",
   "common.loading": "Loading…",
   "common.yes": "Yes",
   "common.no": "No",
@@ -178,6 +184,10 @@ const en: Dict = {
   "billing.bills.form.consumption": "Consumption (kWh, optional)",
   "chart.costPerMonth": "Cost per month (€)",
   "chart.consumptionPerMonth": "Consumption per month (kWh)",
+  "billing.form.totalFromMonths": "Comes from the monthly bills",
+  "billing.form.totalManualHint": "Used only while no month has a consumption value.",
+  "billing.warn.missingConsumption":
+    "{count} month(s) without a consumption value. That leaves the total short, so the heating cost comes out too high.",
 
   // ----- water -----
   "water.title": "Water",

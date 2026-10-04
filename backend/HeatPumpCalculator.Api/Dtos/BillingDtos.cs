@@ -22,8 +22,15 @@ public record BillingPeriodDto(
     int Id,
     string Label,
     int SortOrder,
+    /// Summed from the monthly bills; falls back to the stored value for
+    /// periods recorded before per-month consumption was tracked.
     double TotalConsumptionKwh,
     double HeatPumpMeterReading,
+    /// True when TotalConsumptionKwh came from the monthly bills.
+    bool TotalConsumptionIsDerived,
+    /// Months without a consumption value, which make the derived total
+    /// incomplete. Always 0 when the total is the stored fallback.
+    int MonthsMissingConsumption,
     // computed:
     double HeatPumpConsumption,
     double DavidTotalCost,

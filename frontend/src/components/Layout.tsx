@@ -3,10 +3,12 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { useI18n } from "../i18n/LanguageContext";
 import { LANGUAGES } from "../i18n/translations";
+import { useTheme } from "../theme/ThemeContext";
 
 export default function Layout() {
   const { username, role, isAdmin, logout } = useAuth();
   const { t, lang, setLang } = useI18n();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -38,6 +40,14 @@ export default function Layout() {
             <NavLink to="/water" onClick={closeMenu}>{t("nav.water")}</NavLink>
           </nav>
           <span className="spacer" />
+          <button
+            className="secondary small theme-toggle"
+            onClick={toggleTheme}
+            aria-label={t("action.theme")}
+            title={t("action.theme")}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
           <div className="lang-switch">
             {LANGUAGES.map((code) => (
               <button

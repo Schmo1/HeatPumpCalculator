@@ -53,9 +53,25 @@ public class CalculationService
         // David total cost = sum of the monthly bills
         double davidTotalCost = p.MonthlyBills.Sum(b => b.Cost);
 
+        // Total consumption comes from the monthly bills. Early periods were
+        // recorded before per-month consumption was tracked and carry only the
+        // hand-entered total, so that value stays the fallback - deriving 0 for
+        // them would zero out their heating costs.
+        var monthsWithConsumption = p.MonthlyBills.Where(b => b.Consumption.HasValue).ToList();
+        bool totalConsumptionIsDerived = monthsWithConsumption.Count > 0;
+        double totalConsumptionKwh = totalConsumptionIsDerived
+            ? monthsWithConsumption.Sum(b => b.Consumption!.Value)
+            : p.TotalConsumptionKwh;
+
+        // A partially filled period understates the total, which inflates the
+        // heating cost. Surfaced so the UI can flag it rather than quietly bill it.
+        int monthsMissingConsumption = totalConsumptionIsDerived
+            ? p.MonthlyBills.Count(b => !b.Consumption.HasValue)
+            : 0;
+
         // Heating total cost = DavidTotal / TotalConsumption * HeatingConsumption
-        double heatingTotalCost = p.TotalConsumptionKwh != 0
-            ? davidTotalCost / p.TotalConsumptionKwh * heatPumpConsumption
+        double heatingTotalCost = totalConsumptionKwh != 0
+            ? davidTotalCost / totalConsumptionKwh * heatPumpConsumption
             : 0;
 
         // Split: David pays (100 - Sarah's share)%, Sarah pays Sarah's share%
@@ -69,7 +85,9 @@ public class CalculationService
 
         return new BillingPeriodDto(
             p.Id, p.Label, p.SortOrder,
-            p.TotalConsumptionKwh, p.HeatPumpMeterReading,
+            Round(totalConsumptionKwh), p.HeatPumpMeterReading,
+            totalConsumptionIsDerived,
+            monthsMissingConsumption,
             Round(heatPumpConsumption),
             Round(davidTotalCost),
             Round(heatingTotalCost),
